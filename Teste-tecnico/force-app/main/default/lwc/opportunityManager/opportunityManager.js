@@ -2,19 +2,17 @@ import { LightningElement } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getOpportunities from '@salesforce/apex/OpportunityController.getOpportunities';
+import closeOpportunity from '@salesforce/apex/OpportunityController.closeOpportunity';
 
 const RECORD_LIMIT_PER_BATCH = 50;
 
-const ROW_ACTIONS = [
-    { label: 'Ver Mais', name: 'view_details' },
-]
 const COLUMNS_DEF = [
     { label: 'Opportunity Name', fieldName: 'Name', type: 'text' },
     { label: 'Account', fieldName: 'AccountName', type: 'text' },
     { label: 'Stage', fieldName: 'StageName', type: 'text' },
     { label: 'Amount', fieldName: 'Amount', type: 'currency' },
     { label: 'Close Date', fieldName: 'CloseDate', type: 'date-local' },
-    { type: 'action', typeAttributes: { rowActions: ROW_ACTIONS,menuAlignment: 'right'}},
+    { type: 'action', typeAttributes: { rowActions: {fieldName: 'availableActions'},menuAlignment: 'right'}},
 ];
 
 
@@ -27,10 +25,30 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
     searchText = '';
     isLoading = false;
     loadMoreStatus = '';
-    
+    lastRefreshTime = new Date().getTime();
 
     connectedCallback() {
         this.loadOpportunities();
+    }
+    get processedOpportunities() {
+        if (!this.opportunities) {
+            return [];
+        }
+
+        return this.opportunities.map(opp => {
+            const actions = [
+                { label: 'Ver Mais', name: 'view_details' }
+            ];
+
+            if (opp.StageName !== 'Closed Won' && opp.StageName !== 'Closed Lost') 
+                actions.push({ label: 'Marcar como fechada', name: 'mark_as_closed' });
+            
+
+            return {
+                ...opp,
+                availableActions: actions
+            };
+        });
     }
 
     handleLoadMoreData(event) {
@@ -41,14 +59,22 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
                 table.enableInfiniteLoading = false;
             return;
         }
-        this.loadOpportunities(table);
+        this.loadOpportunities();
     }
 
     handleRowAction(evt) {
         const actionName = evt.detail.action.name;
         const row = evt.detail.row;
-        if(actionName === 'view_details')
-            this.navigateToOppRecord(row.Id);
+        switch (actionName) {
+            case 'view_details':
+                this.navigateToOppRecord(row.Id);
+                break;
+            case 'mark_as_closed':
+                this.handleCloseOpportunity(row.Id);
+                break;
+            default:
+                console.error('Ação nãop encontrada:', actionName);
+        }
     }
 
 
@@ -79,21 +105,19 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
     }
 
     showErrorToast(error) {
-        let message = 'Erro desconhecido';
-        if (error && error.body && error.body.message) {
-            message = error.body.message;
-        }
+        const message = error?.body?.message;
         
         const evt = new ShowToastEvent({
-            title: 'Erro ao Carregar Oportunidades',
+            title: 'Erro na Operação',
             message: message,
             variant: 'error',
             mode: 'sticky'
         });
         this.dispatchEvent(evt);
+    
     }
 
-    async loadOpportunities(table) {
+    async loadOpportunities() {
         if (this.isLoading) return;
 
         this.isLoading = true;
@@ -103,7 +127,8 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
             const result = await getOpportunities({ 
                 search: this.searchText,
                 limitSize: RECORD_LIMIT_PER_BATCH,
-                offset: this.offset
+                offset: this.offset,
+                clearCache: this.lastRefreshTime,
             });
 
             const newData = result.records.map(opp => {
@@ -126,6 +151,29 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
             this.loadMoreStatus = 'Erro ao carregar dados.';
             this.showErrorToast(error);
         } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async handleCloseOpportunity(oppId) {
+        try {
+            await closeOpportunity({ opportunityId: oppId });
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Sucesso',
+                    message: 'Oportunidade marcada como "Closed Won".',
+                    variant: 'success'
+                })
+            );
+            this.lastRefreshTime = new Date().getTime();
+            this.opportunities = [];
+            this.offset = 0;
+            this.totalRecords = 0;
+            this.loadOpportunities();
+
+        } catch (error) {
+            this.showErrorToast(error);
             this.isLoading = false;
         }
     }

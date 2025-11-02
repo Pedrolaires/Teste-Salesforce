@@ -36,16 +36,17 @@ public with sharing class OpportunityControllerTest {
     @isTest
     static void shouldLoadAllOpportunities() {
         Test.startTest();
-        OpportunityController.ResponseDataDTO result = OpportunityController.getOpportunities('', 50,0);
+        OpportunityController.ResponseDataDTO result = OpportunityController.getOpportunities('', 50,0, 1L);
         Test.stopTest();
         System.assertEquals(3, result.totalRecords, 'Deve haver todas as oportunidades inseridas no makeData');
         System.assertEquals(3, result.records.size(), 'A quantidade de oportunidades deve ser 3');
     }
 
+
     @isTest
     static void shouldPaginateOpportunities() {
         Test.startTest();
-        OpportunityController.ResponseDataDTO result = OpportunityController.getOpportunities('', 1, 1);
+        OpportunityController.ResponseDataDTO result = OpportunityController.getOpportunities('', 1, 1, 1L);
         Test.stopTest();
 
         System.assertEquals(3, result.totalRecords, 'Total de registros deve ser 3');

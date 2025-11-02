@@ -5,7 +5,7 @@ public with sharing class OpportunityController {
     private static final Integer DEFAULT_OFFSET = 0;
 
     @AuraEnabled(cacheable=true)
-    public static ResponseDataDTO getOpportunities(String search, Integer limitSize, Integer offset) {
+    public static ResponseDataDTO getOpportunities(String search, Integer limitSize, Integer offset, Long clearCache) {
         try {
             String whereQuery = '';
             String selecQuery = 'SELECT Id, Name, StageName, Amount, CloseDate, Account.Name FROM Opportunity';
@@ -37,6 +37,22 @@ public with sharing class OpportunityController {
         }catch (Exception e) {
             System.debug('Erro no apex: ' + e.getMessage());
             throw new AuraHandledException('Erro no Apex: ' + e.getMessage() + ' (Linha: ' + e.getLineNumber() + ')');
+        }
+    }
+
+
+    @AuraEnabled
+    public static void closeOpportunity(String opportunityId) {
+        try {
+            Opportunity opp = new Opportunity(
+                Id = opportunityId,
+                StageName = 'Closed Won'
+            );
+            update opp;
+
+        } catch (Exception e) {
+            System.debug('Erro ao fechar Oportunidade: ' + e.getMessage());
+            throw new AuraHandledException('Falha ao fechar Oportunidade: ' + e.getMessage());
         }
     }
 
