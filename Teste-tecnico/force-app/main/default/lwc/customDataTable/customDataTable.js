@@ -10,9 +10,7 @@ export default class CustomDataTable extends LightningElement {
 
     handleLoadMore(evt) {
         this.dispatchEvent(new CustomEvent('loadmore', {
-            detail: {
-                target: evt.target 
-            }
+            detail: evt.detail 
         }));
     }
 
