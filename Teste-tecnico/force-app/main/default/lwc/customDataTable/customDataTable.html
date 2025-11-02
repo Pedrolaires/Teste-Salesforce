@@ -1,15 +1,13 @@
 <template>
-    <lightning-datatable
-        key-field="Id"
-        data={records}
-        columns={columns}
-        enable-infinite-loading
-        is-loading={isLoading}
-        load-more-offset="20"
-        onloadmore={handleLoadMore}>
-    </lightning-datatable>
-
-    <div if:true={loadMoreStatus} class="slds-var-p-around_small slds-text-align_center">
-        {loadMoreStatus}
+    <div class="table-container">
+        <lightning-datatable
+            key-field="Id"
+            data={records}
+            columns={columns}
+            enable-infinite-loading
+            is-loading={isLoading}
+            load-more-offset="20"
+            onloadmore={handleLoadMore}>
+        </lightning-datatable>
     </div>
 </template>

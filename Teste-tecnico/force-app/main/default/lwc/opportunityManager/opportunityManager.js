@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc'; 
+import { LightningElement } from 'lwc'; 
 import getOpportunities from '@salesforce/apex/OpportunityController.getOpportunities';
 
 const RECORD_LIMIT_PER_BATCH = 50;
@@ -13,16 +13,12 @@ const COLUMNS_DEF = [
 
 export default class OpportunityManager extends LightningElement {
     columns = COLUMNS_DEF;
-    
-    @track
     opportunities = []; 
-
     offset = 0;
     totalRecords = 0;
     searchText = '';
-
     isLoading = false;
-    loadMoreStatus = '';
+    
 
     connectedCallback() {
         this.loadOpportunities();
@@ -32,7 +28,6 @@ export default class OpportunityManager extends LightningElement {
         const table = event?.detail?.target;
 
         if (this.opportunities.length >= this.totalRecords) {
-            this.loadMoreStatus = 'Não há mais registros para carregar.';
             if (table) {
                 table.enableInfiniteLoading = false;
             }
@@ -46,9 +41,6 @@ export default class OpportunityManager extends LightningElement {
         if (this.isLoading) return;
 
         this.isLoading = true;
-        this.loadMoreStatus = 'Carregando...';
-        if (table) table.isLoading = true;
-
         try {
             const result = await getOpportunities({ 
                 search: this.searchText,
@@ -56,7 +48,7 @@ export default class OpportunityManager extends LightningElement {
                 offset: this.offset
             });
 
-           const newData = result.records.map(opp => {
+            const newData = result.records.map(opp => {
                 return {
                     Id: opp.Id,
                     Name: opp.Name,
@@ -71,14 +63,10 @@ export default class OpportunityManager extends LightningElement {
             this.opportunities = [...this.opportunities, ...newData];
             this.offset = this.opportunities.length;
 
-            this.loadMoreStatus = '';
-
         } catch (error) {
             console.error('Erro ao buscar oportunidades:', error);
-            this.loadMoreStatus = 'Erro ao carregar dados.';
         } finally {
             this.isLoading = false;
-            if (table) table.isLoading = false;
         }
     }
 }

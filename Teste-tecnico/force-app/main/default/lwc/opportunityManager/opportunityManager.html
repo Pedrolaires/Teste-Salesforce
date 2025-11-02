@@ -1,5 +1,9 @@
 <template>
     <lightning-card title="Opportunity Manager" icon-name="standard:opportunity">
+        
+        <div class="slds-var-p-horizontal_small slds-var-m-bottom_small">
+        </div>
+
         <div class="slds-var-p-horizontal_small">
             <c-custom-data-table
                 columns={columns}
@@ -8,6 +12,6 @@
                 load-more-status={loadMoreStatus}
                 onloadmore={handleLoadMoreData}>
             </c-custom-data-table>
-            </div>
+        </div>
     </lightning-card>
 </template>
