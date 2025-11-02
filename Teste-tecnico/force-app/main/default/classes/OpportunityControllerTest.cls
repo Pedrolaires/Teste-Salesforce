@@ -66,4 +66,14 @@ public with sharing class OpportunityControllerTest {
         Opportunity updatedOpp = [SELECT StageName FROM Opportunity WHERE Id = :opp.Id];
         System.assertEquals('Closed Won', updatedOpp.StageName, 'O StageName deveria ter sido atualizado para \"Closed Won\"');
     }
+
+    @isTest
+    public static void shoudlSearchOpportunityByParameter(){
+        Test.startTest();
+        OpportunityController.ResponseDataDTO result = OpportunityController.getOpportunities(
+            'Conta teste 1', 50, 0, null);
+        Test.stopTest();
+        System.assertEquals(2, result.totalRecords, 'A busca com pesquisa deve retornar 2 como total');
+        System.assertEquals(2, result.records.size(), 'A busca com pesquisa deve retornar 2 como total de registros');
+    }
 }

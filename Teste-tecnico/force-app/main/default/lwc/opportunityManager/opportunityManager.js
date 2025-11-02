@@ -91,8 +91,6 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
 
     handleSearch(event) {
         const searchKey = event.detail.value;
-        console.log('handleSearch key', searchKey)
-        console.log('handleSearch text', this.searchText)
         if (this.searchText === searchKey)
             return;
         
@@ -122,8 +120,6 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
 
         this.isLoading = true;
         try {
-            console.log('loadOpportunities text', this.searchText)
-
             const result = await getOpportunities({ 
                 search: this.searchText,
                 limitSize: RECORD_LIMIT_PER_BATCH,
