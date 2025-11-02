@@ -1,3 +1,4 @@
+/* eslint-disable @lwc/lwc/no-async-operation */
 import { LightningElement, api } from 'lwc';
 
 const DEBOUNCE_DELAY = 300; 
