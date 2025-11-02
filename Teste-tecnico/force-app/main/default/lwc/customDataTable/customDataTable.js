@@ -15,4 +15,10 @@ export default class CustomDataTable extends LightningElement {
             }
         }));
     }
+
+    handleRowAction(evt) {
+        this.dispatchEvent(new CustomEvent('rowaction', {
+            detail: evt.detail 
+        }));
+    }
 }

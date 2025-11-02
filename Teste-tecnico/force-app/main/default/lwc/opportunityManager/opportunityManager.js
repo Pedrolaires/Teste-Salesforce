@@ -1,17 +1,24 @@
-import { LightningElement } from 'lwc'; 
+import { LightningElement } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import getOpportunities from '@salesforce/apex/OpportunityController.getOpportunities';
 
 const RECORD_LIMIT_PER_BATCH = 50;
 
+const ROW_ACTIONS = [
+    { label: 'Ver Mais', name: 'view_details' },
+]
 const COLUMNS_DEF = [
     { label: 'Opportunity Name', fieldName: 'Name', type: 'text' },
     { label: 'Account', fieldName: 'AccountName', type: 'text' },
     { label: 'Stage', fieldName: 'StageName', type: 'text' },
     { label: 'Amount', fieldName: 'Amount', type: 'currency' },
-    { label: 'Close Date', fieldName: 'CloseDate', type: 'date-local' }
+    { label: 'Close Date', fieldName: 'CloseDate', type: 'date-local' },
+    { type: 'action', typeAttributes: { rowActions: ROW_ACTIONS,menuAlignment: 'right'}},
 ];
 
-export default class OpportunityManager extends LightningElement {
+
+
+export default class OpportunityManager extends NavigationMixin(LightningElement) {
     columns = COLUMNS_DEF;
     opportunities = []; 
     offset = 0;
@@ -28,13 +35,30 @@ export default class OpportunityManager extends LightningElement {
         const table = event?.detail?.target;
 
         if (this.opportunities.length >= this.totalRecords) {
-            if (table) {
+            if (table) 
                 table.enableInfiniteLoading = false;
-            }
             return;
         }
-
         this.loadOpportunities(table);
+    }
+
+    handleRowAction(evt) {
+        const actionName = evt.detail.action.name;
+        const row = evt.detail.row;
+        if(actionName === 'view_details')
+            this.navigateToOppRecord(row.Id);
+    }
+
+
+    navigateToOppRecord(oppId) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: oppId,
+                objectApiName: 'Opportunity',
+                actionName: 'view'
+            }
+        });
     }
 
     handleSearch(event) {
