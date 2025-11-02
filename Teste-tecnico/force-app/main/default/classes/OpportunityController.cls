@@ -31,7 +31,11 @@ public with sharing class OpportunityController {
             Integer totalRecords = Database.countQuery(countQuery);
             
             return new ResponseDataDTO(records, totalRecords);
-        } catch (Exception e) {
+        }catch (QueryException e){
+            System.debug('Erro na query: ' + e.getMessage());
+            throw new AuraHandledException('Erro na query: ' + e.getMessage());
+        }catch (Exception e) {
+            System.debug('Erro no apex: ' + e.getMessage());
             throw new AuraHandledException('Erro no Apex: ' + e.getMessage() + ' (Linha: ' + e.getLineNumber() + ')');
         }
     }

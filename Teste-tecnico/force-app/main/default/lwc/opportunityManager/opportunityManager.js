@@ -1,5 +1,6 @@
 import { LightningElement } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getOpportunities from '@salesforce/apex/OpportunityController.getOpportunities';
 
 const RECORD_LIMIT_PER_BATCH = 50;
@@ -25,6 +26,7 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
     totalRecords = 0;
     searchText = '';
     isLoading = false;
+    loadMoreStatus = '';
     
 
     connectedCallback() {
@@ -76,6 +78,21 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
         this.loadOpportunities();
     }
 
+    showErrorToast(error) {
+        let message = 'Erro desconhecido';
+        if (error && error.body && error.body.message) {
+            message = error.body.message;
+        }
+        
+        const evt = new ShowToastEvent({
+            title: 'Erro ao Carregar Oportunidades',
+            message: message,
+            variant: 'error',
+            mode: 'sticky'
+        });
+        this.dispatchEvent(evt);
+    }
+
     async loadOpportunities(table) {
         if (this.isLoading) return;
 
@@ -106,6 +123,8 @@ export default class OpportunityManager extends NavigationMixin(LightningElement
 
         } catch (error) {
             console.error('Erro ao buscar oportunidades:', error);
+            this.loadMoreStatus = 'Erro ao carregar dados.';
+            this.showErrorToast(error);
         } finally {
             this.isLoading = false;
         }
