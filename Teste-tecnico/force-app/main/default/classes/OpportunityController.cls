@@ -13,7 +13,12 @@ public with sharing class OpportunityController {
 
             Integer effectiveLimit = (limitSize == null || limitSize <= 0) ? DEFAULT_LIMIT : limitSize;
             Integer effectiveOffset = (offset == null || offset < 0) ? DEFAULT_OFFSET : offset;
-            
+            System.debug('selecQuery: ' + selecQuery);
+            System.debug('countQuery: ' + countQuery);
+            System.debug('effectiveLimit: ' + effectiveLimit);
+            System.debug('effectiveOffset: ' + effectiveOffset);
+            System.debug('whereQuery: ' + whereQuery);
+            System.debug('search: ' + search);
             if (String.isNotBlank(search)) {
                 String safeQuery = '%' + String.escapeSingleQuotes(search) + '%';
                 whereQuery = ' WHERE Account.Name LIKE :safeQuery';

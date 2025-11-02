@@ -4,13 +4,19 @@
         <div class="slds-var-p-horizontal_small slds-var-m-bottom_small">
         </div>
 
-        <div class="slds-var-p-horizontal_small">
+        <div class="slds-col slds-p-bottom_small">
+            <c-search-bar
+                placeholder="Pesquisar por nome da conta..."
+                onsearch={handleSearch}>
+            </c-search-bar>
+        </div>
+        <div class="slds-col slds-grow table-wrapper">
             <c-custom-data-table
                 columns={columns}
                 records={opportunities}
                 is-loading={isLoading}
-                load-more-status={loadMoreStatus}
-                onloadmore={handleLoadMoreData}>
+                onloadmore={handleLoadMoreData}
+                class="full-height-table">
             </c-custom-data-table>
         </div>
     </lightning-card>

@@ -37,11 +37,28 @@ export default class OpportunityManager extends LightningElement {
         this.loadOpportunities(table);
     }
 
+    handleSearch(event) {
+        const searchKey = event.detail.value;
+        console.log('handleSearch key', searchKey)
+        console.log('handleSearch text', this.searchText)
+        if (this.searchText === searchKey)
+            return;
+        
+        this.searchText = searchKey;
+        this.opportunities = [];
+        this.offset = 0;
+        this.totalRecords = 0;
+
+        this.loadOpportunities();
+    }
+
     async loadOpportunities(table) {
         if (this.isLoading) return;
 
         this.isLoading = true;
         try {
+            console.log('loadOpportunities text', this.searchText)
+
             const result = await getOpportunities({ 
                 search: this.searchText,
                 limitSize: RECORD_LIMIT_PER_BATCH,
